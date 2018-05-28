@@ -16,7 +16,7 @@ def create_app(config=config.base_config):
         """Returns the applications index page."""
         return render_template('index.html')
 
-    if app.config['DEBUG'] == True:
+    if app.config['DEBUG'] is True:
         print(app.url_map)
 
     return app
