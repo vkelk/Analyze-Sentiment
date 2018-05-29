@@ -1,6 +1,13 @@
 import requests
-from flask import jsonify
+from flask import jsonify, render_template
 from app.sentiment import sentiment
+
+
+@sentiment.route('/')
+@sentiment.route('/analyzesentiment')
+def index():
+    """Returns the applications index page."""
+    return render_template('index.html')
 
 
 @sentiment.route('/getSentiment/<text>')
