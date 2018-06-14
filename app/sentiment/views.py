@@ -3,7 +3,7 @@ import os
 import requests
 import uuid
 
-from flask import jsonify, render_template, request, current_app, Markup, flash
+from flask import jsonify, render_template, request, Markup, flash
 from werkzeug.utils import secure_filename, CombinedMultiDict
 
 from app.config import base_config
