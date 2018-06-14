@@ -12,6 +12,57 @@ from .forms import FileForm
 from .audio2text import audio_to_flac, speech_recognition
 
 
+def sentiment_request(text):
+    api_url = 'http://text-processing.com/api/sentiment/'
+    return requests.post(api_url, data={'text': text})
+
+
+def language_request(text):
+    api_key = base_config.API_KEY_LANG
+    endpoint = 'https://ws.detectlanguage.com/0.2/detect'
+    headers = {
+        'content-type': 'application/json',
+        'Authorization': 'Bearer %s' % api_key
+        }
+    data = {'q': text}
+    return requests.post(endpoint, data=json.dumps(data), headers=headers)
+
+
+def jargon_request(text):
+    bugreportwords = ['wrong', 'incorrect', 'not showing', 'slow', 'cannot',
+        'error', 'not updating', 'challenge', "can't", 'did not load', 'missing',
+        'no update', 'does not display', 'get rid', "can't view", 'system down',
+        "can't update", 'difficult', 'doesnt work', 'issue', 'bug']
+    featurewords = ['add', 'would love', 'no way', 'would like', 'possible',
+        'would be nice', 'a way to', 'need to', 'suggest', 'be able to',
+        'give options', 'should be', 'being able', 'ability', 'need', 'feature']
+    instructionwords = ['how do i', 'not clear']
+    jargon = ['ACW', 'ADP', 'AEBT', 'AET', 'AHT', 'ANI', 'BAU', 'BPO', 'BTC',
+        'BTOP', 'BTSC', 'BU', 'CBA', 'CBR', 'CCCS', 'CCM', 'COPQ', 'CPT',
+        'CR&M', 'CSI', 'CT', 'CTI', 'DNIS', 'EXL', 'GBCC', 'GBP', 'GCG', 'GDS',
+        'GPR', 'GSR', 'GTT', 'HBS', 'ICM', 'IRD', 'IVR', 'JAR', 'KPI', 'LM',
+        'LRP', 'MCV', 'MLRB', 'MMD', 'MMS', 'MU', 'NIVR', 'NOC', 'OBT', 'OLBT',
+        'ONS', 'PA', 'PA', 'PBX', 'PCC', 'PMO', 'PMP', 'PMP', 'PNR', 'SCCM',
+        'SD', 'SDL', 'SDM', 'SDN', 'SDO', 'SIT', 'SLC', 'SLM', 'SQP', 'TC',
+        'TER', 'TL', 'TSF', 'VDN', 'VR', 'WAH', 'WBS', 'WFM', 'WIA', 'TM', 'LOA']
+
+    requesttypethis = 'Unknown'
+    jargonthis = 'False'
+    messagethis = text
+
+    if messagethis is not None:
+        if any(s in messagethis for s in bugreportwords):
+            requesttypethis = 'Bug Report'
+        if any(s in messagethis for s in featurewords):
+            requesttypethis = 'Feature Request'
+        if any(s in messagethis for s in instructionwords):
+            requesttypethis = 'Instructions Needed'
+        if any(s in messagethis for s in jargon):
+            jargonthis = 'True'
+
+    return {"requesttypethis": requesttypethis, "jargonthis": jargonthis}
+
+
 @sentiment.route('/', methods=['GET', 'POST'])
 @sentiment.route('/analyzesentiment', methods=['GET', 'POST'])
 def index():
@@ -53,21 +104,13 @@ def index():
 
 @sentiment.route('/getSentiment/<text>')
 def getSentiment(text):
-    api_url = 'http://text-processing.com/api/sentiment/'
-    r = requests.post(api_url, data={'text': text})
+    r = sentiment_request(text)
     return jsonify(r.json())
 
 
 @sentiment.route('/getLanguage/<text>')
 def getLanguage(text):
-    api_key = base_config.API_KEY_LANG
-    endpoint = 'https://ws.detectlanguage.com/0.2/detect'
-    headers = {
-        'content-type': 'application/json',
-        'Authorization': 'Bearer %s' % api_key
-        }
-    data = {'q': text}
-    r = requests.post(endpoint, data=json.dumps(data), headers=headers)
+    r = language_request(text)
     if r.status_code != 200:
         return jsonify({"error": "Something went wrong with the API"})
     return jsonify(r.json()['data'])
@@ -75,36 +118,46 @@ def getLanguage(text):
 
 @sentiment.route('/getJargon/<text>')
 def getJargon(text):
-    bugreportwords = ['wrong', 'incorrect', 'not showing', 'slow', 'cannot',
-        'error', 'not updating', 'challenge', "can't", 'did not load', 'missing',
-        'no update', 'does not display', 'get rid', "can't view", 'system down',
-        "can't update", 'difficult', 'doesnt work', 'issue', 'bug']
-    featurewords = ['add', 'would love', 'no way', 'would like', 'possible',
-        'would be nice', 'a way to', 'need to', 'suggest', 'be able to',
-        'give options', 'should be', 'being able', 'ability', 'need', 'feature']
-    instructionwords = ['how do i', 'not clear']
-    jargon = ['ACW', 'ADP', 'AEBT', 'AET', 'AHT', 'ANI', 'BAU', 'BPO', 'BTC',
-        'BTOP', 'BTSC', 'BU', 'CBA', 'CBR', 'CCCS', 'CCM', 'COPQ', 'CPT',
-        'CR&M', 'CSI', 'CT', 'CTI', 'DNIS', 'EXL', 'GBCC', 'GBP', 'GCG', 'GDS',
-        'GPR', 'GSR', 'GTT', 'HBS', 'ICM', 'IRD', 'IVR', 'JAR', 'KPI', 'LM',
-        'LRP', 'MCV', 'MLRB', 'MMD', 'MMS', 'MU', 'NIVR', 'NOC', 'OBT', 'OLBT',
-        'ONS', 'PA', 'PA', 'PBX', 'PCC', 'PMO', 'PMP', 'PMP', 'PNR', 'SCCM',
-        'SD', 'SDL', 'SDM', 'SDN', 'SDO', 'SIT', 'SLC', 'SLM', 'SQP', 'TC',
-        'TER', 'TL', 'TSF', 'VDN', 'VR', 'WAH', 'WBS', 'WFM', 'WIA', 'TM', 'LOA']
+    return jsonify(jargon_request(text))
 
-    requesttypethis = 'Unknown'
-    jargonthis = 'False'
-    messagethis = text
 
-    if messagethis is not None:
-        if any(s in messagethis for s in bugreportwords):
-            requesttypethis = 'Bug Report'
-        if any(s in messagethis for s in featurewords):
-            requesttypethis = 'Feature Request'
-        if any(s in messagethis for s in instructionwords):
-            requesttypethis = 'Instructions Needed'
-        if any(s in messagethis for s in jargon):
-            jargonthis = 'True'
-
-    data = {"requesttypethis": requesttypethis, "jargonthis": jargonthis}
-    return jsonify(data)
+@sentiment.route('/api/audiofile', methods=['GET', 'POST'])
+def audiofile():
+    if request.method == 'POST':
+        form = FileForm(CombinedMultiDict((request.files, request.form)))
+        if form.validate_on_submit():
+            data = {}
+            f = form.file_input.data
+            data['filename'] = f.filename
+            filename = secure_filename(str(uuid.uuid4())[:8] + f.filename)
+            file_location = os.path.join(
+                base_config.UPLOAD_FOLDER, filename
+                )
+            f.save(file_location)
+            temp_audio_file = audio_to_flac(file_location)
+            if temp_audio_file:
+                try:
+                    results = speech_recognition(
+                        temp_audio_file,
+                        base_config.API_KEY_SPEACH2TEXT
+                        )
+                    data['text'] = '\n'.join(results['data'])
+                    data['status'] = 'OK'
+                except Exception:
+                    data['status'] = 'error'
+                    data['err_message'] = 'Could not extract text from the file'
+            else:
+                data['status'] = 'error'
+                data['err_message'] = 'Incorrect input file format'
+            if data['status'] == 'OK':
+                try:
+                    r = sentiment_request(data['text'])
+                    data['text_sentiment'] = r.json()
+                    r = language_request(data['text'])
+                    data['text_language'] = r.json()
+                    d = jargon_request(data['text'])
+                    data['text_jargon'] = d
+                except Exception:
+                    print(Exception)
+        return jsonify(data)
+    return render_template('api_doc.html')

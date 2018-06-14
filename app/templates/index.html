@@ -65,7 +65,7 @@
                     <div class="col-sm-12">
                         <div class="jumbotron" style="margin-top: 20px;">
                             <h3>Converted audio to text:</h3>
-                            <p>{{ text_results}}</p>
+                            <p id="text-results">{{ text_results }}</p>
                         </div>
                     </div>
                 </div>
@@ -110,32 +110,48 @@ function syntaxHighlight(json) {
 
 $(document).ready(function() {
 
-    $("#btn_analyze").click(function() {
-        inputData = $("#txt_input").val();
-        if (inputData.trim().length > 0) { 
-            url = "getSentiment/" + inputData.trim();
+    function getSentiment(inputData) {
+        url = "getSentiment/" + inputData.trim();
             $.getJSON(url, function (data) {
                 var info_text = '<h4>Analyzing Sentiment for <strong>' + inputData.trim() + '</strong></h4>';
                 var str = info_text + '<pre>' + syntaxHighlight(JSON.stringify(data, null, 2)) + '</pre>';
                 $('#sentiment').html(str);
             });
+    }
 
-            url = "getLanguage/" + inputData.trim();
+    function getLanguage(inputData) {
+        url = "getLanguage/" + inputData.trim();
             $.getJSON(url, function (data) {
                 var info_text = '<h4>Analyzing Language for <strong>' + inputData.trim() + '</strong></h4>';
                 var str = info_text + '<pre>' + syntaxHighlight(JSON.stringify(data, null, 2)) + '</pre>';
                 $('#language').html(str);
             });
+    }
 
-            url = "getJargon/" + inputData.trim();
+    function getJargon(inputData) {
+        url = "getJargon/" + inputData.trim();
             $.getJSON(url, function (data) {
                 var info_text = '<h4>Analyzing Jargon for <strong>' + inputData.trim() + '</strong></h4>';
                 var str = info_text + '<pre>' + syntaxHighlight(JSON.stringify(data, null, 2)) + '</pre>';
                 $('#jargon').html(str);
             });
+    }
 
+    $("#btn_analyze").click(function() {
+        var inputData = $("#txt_input").val();
+        if (inputData.trim().length > 0) { 
+            getSentiment(inputData);
+            getLanguage(inputData);
+            getJargon(inputData);
         }
     });
+
+    if ( $("#text-results").length > 0 ) {
+        var inputData = $("#text-results").text();
+        getSentiment(inputData);
+        getLanguage(inputData);
+        getJargon(inputData);
+    }
 
 });
 </script>
