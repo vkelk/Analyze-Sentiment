@@ -58,6 +58,7 @@ db.sqlite3
 
 # Flask stuff:
 instance/
+uploads/
 .webassets-cache
 
 # Scrapy stuff:
@@ -102,3 +103,5 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+*.exe
