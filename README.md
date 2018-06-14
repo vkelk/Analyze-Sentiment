@@ -11,6 +11,7 @@ source bin/activate
 ```bash
 pip install -r requirements.txt
 pip install gunicorn
+sudo apt-get install ffmpeg
 ```
 3. Create service
 ```bash

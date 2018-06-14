@@ -7,6 +7,8 @@ import uuid
 import requests
 import json
 
+from app.config import base_config
+
 
 def speech_recognition(speech_file, api_key, lang_code='en-US', encoding='FLAC'):
     encoding_types = ["ENCODING_UNSPECIFIED",
@@ -36,19 +38,27 @@ def speech_recognition(speech_file, api_key, lang_code='en-US', encoding='FLAC')
     }
     r = requests.post(endpoint, data=json.dumps(data), headers=headers)
     if r.status_code != 200:
-        raise Exception(r.text)
+        message = r.text
+        return {"message": message, "status_code": r.status_code}
     response = json.loads(r.text)
     texts = []
     for res in response['results']:
         alternatives = res['alternatives']
         text_dict = max(alternatives, key=lambda k: k['confidence'])
         texts.append(text_dict['transcript'])
-    return texts
+    return {"data": texts}
 
 
 def audio_to_flac(src, tmp_folder='/tmp'):
-    tmp_file = '%s.flac' % str(uuid.uuid4())[:8]
-    tmp = os.path.join(tmp_folder, tmp_file)
-    FNULL = open(os.devnull, 'w')
-    subprocess.call(['ffmpeg', '-i', src, '-ac', '1', '-af', 'aformat=s16:44100', tmp, '-y'], stdout=FNULL,stderr=subprocess.STDOUT)
+    try:
+        tmp_file = '%s.flac' % str(uuid.uuid4())[:8]
+        tmp = os.path.join(tmp_folder, tmp_file)
+        FNULL = open(os.devnull, 'w')
+        process = subprocess.call([base_config.FFMPEG, '-i', src, '-ac', '1', '-af', 'aformat=s16:44100', tmp, '-y'], stdout=FNULL, stderr=subprocess.PIPE)
+        if process != 0:
+            return None
+    except Exception as e:
+        print(type(e), str(e))
+        raise
+        return None
     return tmp

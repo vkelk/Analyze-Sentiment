@@ -9,7 +9,7 @@ load_dotenv(os.path.join(PROJECT_DIR, '.env'))
 
 class base_config(object):
     """Default configuration options."""
-    UPLOAD_FOLDER = os.path.join(os.path.realpath(PROJECT_DIR), 'uploads/')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/tmp')
     SITE_NAME = os.environ.get('SITE_NAME', 'Analyze Sentiment')
     SECRET_KEY = os.environ.get('SECRET_KEY', 'secrets')
     # SERVER_NAME = os.environ.get('SERVER_NAME', 'the-dilettante.com')
@@ -17,6 +17,7 @@ class base_config(object):
     JSONIFY_PRETTYPRINT_REGULAR = False
     API_KEY_LANG = os.environ.get('API_KEY_LANG', None)
     API_KEY_SPEACH2TEXT = os.environ.get('API_KEY_SPEACH2TEXT', None)
+    FFMPEG = os.environ.get('FFMPEG_PATH', 'ffmpeg')
 
 
 class dev_config(base_config):

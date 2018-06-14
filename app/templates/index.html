@@ -40,7 +40,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <form action="{{ url_for('sentiment.index') }}" method="post" role="form" id="file_form"
+                    <form method="post" role="form" id="file_form"
                         enctype="multipart/form-data">
                     <div class="col-sm-10">
                         {{ render_field(form.file_input, class="form-control") }}
@@ -50,14 +50,25 @@
                     </div>
                     </form>
                 </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        {% for category, message in get_flashed_messages(with_categories=true) %}
+                        <div class="alert alert-dismissable alert-{{ category }}">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
                 {% if text_results %}
                 <div class="row">
-                        <div class="col-sm-12">
-                            <div class="jumbotron">
-                                <p>{{ text_results}}</p>
-                            </div>
+                    <div class="col-sm-12">
+                        <div class="jumbotron" style="margin-top: 20px;">
+                            <h3>Converted audio to text:</h3>
+                            <p>{{ text_results}}</p>
                         </div>
                     </div>
+                </div>
                 {% endif %}
                 <div class="row">
                     <div class="col-sm-12">
