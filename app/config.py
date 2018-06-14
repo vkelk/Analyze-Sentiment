@@ -14,6 +14,7 @@ class base_config(object):
     # SERVER_NAME = os.environ.get('SERVER_NAME', 'the-dilettante.com')
     SERVER_NAME = None
     JSONIFY_PRETTYPRINT_REGULAR = False
+    API_KEY_LANG = os.environ.get('API_KEY_LANG', None)
 
 
 class dev_config(base_config):
