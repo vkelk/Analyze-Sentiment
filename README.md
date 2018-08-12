@@ -1,5 +1,5 @@
 # Analyze-Sentiment
-Simple Flask site that uses external API
+Simple Flask site that converts mp3 to text and does text analytics.
 
 ## Deployment steps
 1. Create virtual environment
